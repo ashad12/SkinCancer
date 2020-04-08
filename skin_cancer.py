@@ -22,3 +22,11 @@ for t in types:
   type_dir = dataset_dir + t
   if not os.path.isdir(type_dir):
     os.makedirs(type_dir)
+
+# following code is run only ONCE to sort out data based on lesion type
+for file in tqdm.notebook.tqdm(glob.glob(orig_data_dir +'/*/*.jpg')):
+  file_name = file.split('/').pop()
+  image_id = file_name.split('.')[0]
+  idx = id2type[id2type['image_id']==image_id].index[0]
+  t = id2type.iloc[idx]['dx']
+  shutil.copy(src=file, dst=os.path.join(dataset_dir, t, file_name))
