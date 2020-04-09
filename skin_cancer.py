@@ -9,6 +9,9 @@ from sklearn.model_selection import train_test_split
 from torchvision import datasets
 from torchvision import transforms
 from torchvision import models
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
 # from google.colab import drive
 # drive.mount('/content/gdrive')
 
@@ -87,3 +90,20 @@ test_dataset = datasets.ImageFolder(test_dir, transform=transform)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
 valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=32, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
+
+### Model definition
+detector = models.resnext101_32x8d(pretrained=True)
+for m in detector.children():
+  # print(m.__class__.__name__)
+  for p in m.parameters():
+    p.requires_grad = False
+
+for p in detector.fc.parameters():
+  p.requires_grad = True
+  print(p)
+
+classifier = nn.Sequential(nn.Linear(2048, 1000), nn.ReLU(), nn.Dropout(.3),
+                           nn.Linear(1000, 500),  nn.ReLU(), nn.Dropout(.3),
+                           nn.Linear(500, 50), nn.ReLU(), nn.Dropout(.3),
+                           nn.Linear(50, 7))
+detector.fc = classifier
