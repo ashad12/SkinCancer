@@ -68,3 +68,22 @@ for idd in tqdm.notebook.tqdm(ids):
     dst = os.path.join(dir,'test', idd, file)
     shutil.copy(src, dst)
   print(f'=========================END of {idd} files=========================\n')
+
+## Dataloader setup
+train_dir = os.path.join(dir, 'train')
+valid_dir = os.path.join(dir, 'valid')
+test_dir = os.path.join(dir, 'test')
+
+transform = transforms.Compose([transforms.Resize((224,224)), transforms.RandomRotation(10),
+                                transforms.RandomVerticalFlip(.3),
+                                transforms.RandomHorizontalFlip(.3),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean = [0.485, 0.456, 0.406],
+                                                     std = [0.229, 0.224, 0.225])])
+train_dataset = datasets.ImageFolder(train_dir, transform=transform)
+valid_dataset = datasets.ImageFolder(valid_dir, transform=transform)
+test_dataset = datasets.ImageFolder(test_dir, transform=transform)
+
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=32, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=True)
